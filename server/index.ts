@@ -5,7 +5,7 @@ import { FlowService } from './services/flowService';
 import { verifyFlowSignature } from './utils/flowSignature';
 
 // Load environment variables
-dotenv.config({ path: '.env.local' });
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -63,7 +63,7 @@ app.post('/api/payment/create', async (req: Request, res: Response) => {
       email,
       payerName,
       urlConfirmation: `${baseUrl}/api/payment/confirm`,
-      urlReturn: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/payment/result`,
+      urlReturn: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/payment/result`,
       optional: JSON.stringify({ rut, phone, productId }) // Store additional data
     });
 

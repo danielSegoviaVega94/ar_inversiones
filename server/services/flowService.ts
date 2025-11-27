@@ -85,11 +85,15 @@ export class FlowService {
     const signedParams = signFlowParams(flowParams, this.config.secretKey);
 
     try {
+      const params = new URLSearchParams();
+      Object.keys(signedParams).forEach(key => {
+        params.append(key, String(signedParams[key]));
+      });
+
       const response = await axios.post(
         `${this.config.apiUrl}/payment/create`,
-        null,
+        params,
         {
-          params: signedParams,
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
           }

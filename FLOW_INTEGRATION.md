@@ -69,7 +69,7 @@ npm install
 Copia el archivo `.env.example` a `.env.local` y configura tus credenciales:
 
 ```bash
-cp .env.example .env.local
+cp .env .env.local
 ```
 
 ### 3. Iniciar el proyecto

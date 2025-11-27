@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
-
-interface PaymentResultProps {
-  token?: string;
-}
 
 interface PaymentData {
   status: 'approved' | 'pending' | 'rejected';
   paymentStatus?: any;
 }
 
-const PaymentResult: React.FC<PaymentResultProps> = ({ token }) => {
+const PaymentResult: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
+
   const [loading, setLoading] = useState(true);
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -62,12 +62,12 @@ const PaymentResult: React.FC<PaymentResultProps> = ({ token }) => {
           <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Error</h2>
           <p className="text-gray-600 mb-6">{error || 'Ocurrió un error inesperado'}</p>
-          <a
-            href="/"
+          <Link
+            to="/"
             className="inline-block bg-brand-dark text-white font-bold py-3 px-8 rounded-sm hover:bg-gray-800 transition-colors"
           >
             Volver al inicio
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -104,12 +104,12 @@ const PaymentResult: React.FC<PaymentResultProps> = ({ token }) => {
               )}
             </div>
           )}
-          <a
-            href="/"
+          <Link
+            to="/"
             className="inline-block bg-brand-dark text-white font-bold py-3 px-8 rounded-sm hover:bg-gray-800 transition-colors"
           >
             Volver al inicio
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -124,12 +124,12 @@ const PaymentResult: React.FC<PaymentResultProps> = ({ token }) => {
           <p className="text-gray-600 mb-6">
             Tu pago no pudo ser procesado. Por favor intenta nuevamente o usa otro método de pago.
           </p>
-          <a
-            href="/"
+          <Link
+            to="/"
             className="inline-block bg-brand-dark text-white font-bold py-3 px-8 rounded-sm hover:bg-gray-800 transition-colors"
           >
             Volver al inicio
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -143,12 +143,12 @@ const PaymentResult: React.FC<PaymentResultProps> = ({ token }) => {
         <p className="text-gray-600 mb-6">
           Tu pago está siendo procesado. Te notificaremos cuando se complete.
         </p>
-        <a
-          href="/"
+        <Link
+          to="/"
           className="inline-block bg-brand-dark text-white font-bold py-3 px-8 rounded-sm hover:bg-gray-800 transition-colors"
         >
           Volver al inicio
-        </a>
+        </Link>
       </div>
     </div>
   );
