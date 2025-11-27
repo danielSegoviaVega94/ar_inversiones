@@ -2,22 +2,13 @@ import { TicketProduct } from './types';
 
 export const PRODUCTS: TicketProduct[] = [
   {
-    id: 'economico',
-    title: 'ECONOMICO',
-    subtitle: '1 STICKER X $3.000',
-    price: 3000,
-    description: 'No pierdas esta oportunidad de tener tu Moto.',
+    id: 'ticket-unico',
+    title: 'TICKET OFICIAL',
+    subtitle: '1 TICKET X $10.000',
+    price: 10000,
+    description: 'Compra tu ticket y participa por increíbles premios. Recibirás tu número único por correo.',
     iconType: 'instagram',
     itemsCount: 1
-  },
-  {
-    id: 'pack4',
-    title: 'CUPÓN: PACK4',
-    subtitle: '4 STICKER X $10.000',
-    price: 10000,
-    description: 'No pierdas esta oportunidad de tener tu Moto.',
-    iconType: 'tiktok',
-    itemsCount: 4
   }
 ];
 

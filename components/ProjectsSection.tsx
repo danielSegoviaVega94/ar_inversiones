@@ -42,22 +42,15 @@ const TicketSection: React.FC<TicketSectionProps> = ({ onBuy }) => {
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="flex justify-center">
           {PRODUCTS.map((product) => (
-            <div key={product.id} className="bg-gray-100 rounded-lg p-8 flex flex-col items-center text-center shadow-lg hover:shadow-xl transition-shadow border border-transparent hover:border-gray-200">
-              
+            <div key={product.id} className="bg-gray-100 rounded-lg p-10 flex flex-col items-center text-center shadow-lg hover:shadow-xl transition-shadow border border-transparent hover:border-gray-200 max-w-lg w-full">
+
               {/* Icon */}
               <div className="mb-6 text-brand-dark">
-                 {product.id === 'economico' ? (
-                   // Placeholder for custom icon in design, using Lucide for now
-                   <div className="w-20 h-20 border-4 border-brand-dark rounded-full flex items-center justify-center">
-                      <span className="text-4xl font-bold">1</span>
-                   </div>
-                 ) : (
-                   <div className="w-20 h-20 border-4 border-brand-dark rounded-full flex items-center justify-center">
-                      <span className="text-4xl font-bold">%</span>
-                   </div>
-                 )}
+                <div className="w-24 h-24 border-4 border-brand-dark rounded-full flex items-center justify-center">
+                  <span className="text-5xl font-bold">🎫</span>
+                </div>
               </div>
 
               <h3 className="text-xl font-black text-brand-dark uppercase mb-2">

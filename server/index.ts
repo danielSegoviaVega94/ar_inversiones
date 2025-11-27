@@ -6,6 +6,8 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { FlowService } from './services/flowService';
 import { verifyFlowSignature } from './utils/flowSignature';
+import { TicketService } from './services/ticketService';
+import { EmailService } from './services/emailService';
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -48,6 +50,21 @@ const flowService = new FlowService({
   apiUrl: process.env.FLOW_API_URL || 'https://sandbox.flow.cl/api'
 });
 
+// Initialize Ticket service
+const ticketService = new TicketService();
+
+// Initialize Email service
+const emailService = new EmailService({
+  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+  port: parseInt(process.env.EMAIL_PORT || '587'),
+  secure: process.env.EMAIL_SECURE === 'true',
+  auth: {
+    user: process.env.EMAIL_USER || '',
+    pass: process.env.EMAIL_PASS || ''
+  },
+  from: process.env.EMAIL_FROM || 'Osvaldo Inversiones <noreply@osvaldoinversiones.cl>'
+});
+
 // Store for tracking payments (in production, use a database)
 const paymentStore = new Map<string, any>();
 
@@ -74,8 +91,28 @@ app.post('/api/payment/create', async (req: Request, res: Response) => {
       });
     }
 
+    // Check if tickets are available
+    const ticketsAvailable = await ticketService.areTicketsAvailable();
+    if (!ticketsAvailable) {
+      return res.status(400).json({
+        error: 'No hay más tickets disponibles',
+        message: 'Se han vendido todos los 10,000 tickets. ¡Gracias por tu interés!'
+      });
+    }
+
     // Generate unique commerce order ID
     const commerceOrder = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    // Reserve ticket
+    const ticket = await ticketService.reserveTicket({
+      commerceOrder,
+      email,
+      payerName,
+      rut,
+      phone
+    });
+
+    console.log(`🎫 Ticket #${ticket.ticketNumber} reserved for ${email}`);
 
     // Get the base URL from the request
     const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
@@ -99,7 +136,7 @@ app.post('/api/payment/create', async (req: Request, res: Response) => {
       payerName,
       urlConfirmation: `${baseUrl}/api/payment/confirm`,
       urlReturn,
-      optional: JSON.stringify({ rut, phone, productId }) // Store additional data
+      optional: JSON.stringify({ rut, phone, productId, ticketNumber: ticket.ticketNumber }) // Store additional data
     });
 
     // Store payment info
@@ -112,6 +149,7 @@ app.post('/api/payment/create', async (req: Request, res: Response) => {
       rut,
       phone,
       productId,
+      ticketNumber: ticket.ticketNumber,
       flowOrder: paymentResponse.flowOrder,
       token: paymentResponse.token,
       status: 'pending',
@@ -125,7 +163,8 @@ app.post('/api/payment/create', async (req: Request, res: Response) => {
       paymentUrl: paymentResponse.url,
       token: paymentResponse.token,
       flowOrder: paymentResponse.flowOrder,
-      commerceOrder
+      commerceOrder,
+      ticketNumber: ticket.ticketNumber
     });
 
   } catch (error: any) {
@@ -202,11 +241,41 @@ app.post('/api/payment/confirm', async (req: Request, res: Response) => {
     // Flow expects "CONFIRMADO" response
     res.send('CONFIRMADO');
 
-    // Here you would typically:
-    // 1. Update your database
-    // 2. Send confirmation email
-    // 3. Grant access to purchased content
-    // 4. etc.
+    // Process payment confirmation asynchronously
+    if (paymentStatus.status === 2) {
+      // Payment approved - confirm ticket and send email
+      (async () => {
+        try {
+          // Confirm ticket
+          const ticket = await ticketService.confirmTicket(paymentStatus.commerceOrder, paymentStatus.flowOrder);
+
+          if (ticket) {
+            console.log(`✅ Ticket #${ticket.ticketNumber} confirmed for order ${paymentStatus.commerceOrder}`);
+
+            // Send confirmation email
+            const emailSent = await emailService.sendTicketEmail(ticket);
+
+            if (emailSent) {
+              console.log(`📧 Confirmation email sent to ${ticket.email}`);
+            } else {
+              console.error(`❌ Failed to send email to ${ticket.email}`);
+            }
+          }
+        } catch (error) {
+          console.error('Error processing confirmation:', error);
+        }
+      })();
+    } else {
+      // Payment rejected - cancel ticket
+      (async () => {
+        try {
+          await ticketService.cancelTicket(paymentStatus.commerceOrder);
+          console.log(`❌ Ticket cancelled for order ${paymentStatus.commerceOrder}`);
+        } catch (error) {
+          console.error('Error cancelling ticket:', error);
+        }
+      })();
+    }
 
   } catch (error: any) {
     console.error('Error confirming payment:', error);
@@ -273,11 +342,56 @@ app.get('/api/payment/verify/:token', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * Get ticket statistics endpoint
+ * Returns available tickets and sales stats
+ */
+app.get('/api/tickets/stats', async (req: Request, res: Response) => {
+  try {
+    const stats = await ticketService.getStats();
+    res.json(stats);
+  } catch (error: any) {
+    console.error('Error getting ticket stats:', error);
+    res.status(500).json({
+      error: 'Failed to get ticket stats',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * Get ticket by order endpoint
+ * Returns ticket information for a specific order
+ */
+app.get('/api/tickets/order/:commerceOrder', async (req: Request, res: Response) => {
+  try {
+    const { commerceOrder } = req.params;
+    const ticket = await ticketService.getTicketByOrder(commerceOrder);
+
+    if (!ticket) {
+      return res.status(404).json({ error: 'Ticket not found' });
+    }
+
+    res.json(ticket);
+  } catch (error: any) {
+    console.error('Error getting ticket:', error);
+    res.status(500).json({
+      error: 'Failed to get ticket',
+      message: error.message
+    });
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Flow API URL: ${process.env.FLOW_API_URL}`);
   console.log(`🔑 Flow API Key: ${process.env.FLOW_API_KEY?.substring(0, 10)}...`);
+
+  // Log ticket stats on startup
+  ticketService.getStats().then(stats => {
+    console.log(`🎫 Tickets: ${stats.confirmed} vendidos | ${stats.available} disponibles de ${stats.maxTickets}`);
+  });
 });
 
 export default app;
