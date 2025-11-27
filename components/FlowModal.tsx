@@ -23,6 +23,9 @@ const FlowModal: React.FC<FlowModalProps> = ({ paymentState, onClose, onSuccess 
     setStep('flow_redirect');
 
     try {
+      console.log('🚀 Iniciando proceso de pago...');
+      console.log('📍 Backend URL:', 'http://localhost:3001/api/payment/create');
+
       // Call our backend to create payment in Flow
       const response = await fetch('http://localhost:3001/api/payment/create', {
         method: 'POST',
@@ -40,17 +43,30 @@ const FlowModal: React.FC<FlowModalProps> = ({ paymentState, onClose, onSuccess 
         })
       });
 
-      const data = await response.json();
+      console.log('📥 Respuesta recibida, status:', response.status);
 
-      if (data.success && data.paymentUrl) {
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('❌ Error del servidor:', errorData);
+        throw new Error(errorData.message || 'Error al crear el pago');
+      }
+
+      const data = await response.json();
+      console.log('✅ Datos recibidos:', data);
+
+      if (data.success && data.paymentUrl && data.token) {
+        const redirectUrl = `${data.paymentUrl}?token=${data.token}`;
+        console.log('🔀 Redirigiendo a Flow:', redirectUrl);
+
         // Redirect to Flow payment page
-        window.location.href = `${data.paymentUrl}?token=${data.token}`;
+        window.location.href = redirectUrl;
       } else {
-        throw new Error('Failed to create payment');
+        console.error('❌ Respuesta inválida:', data);
+        throw new Error(data.message || 'Respuesta inválida del servidor');
       }
     } catch (error) {
-      console.error('Error creating payment:', error);
-      alert('Ocurrió un error al procesar el pago. Por favor intenta nuevamente.');
+      console.error('❌ Error completo:', error);
+      alert(`Ocurrió un error al procesar el pago: ${error instanceof Error ? error.message : 'Error desconocido'}. Por favor intenta nuevamente.`);
       setStep('details');
     }
   };
