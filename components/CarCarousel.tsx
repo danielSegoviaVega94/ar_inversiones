@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CarouselImage {
@@ -38,6 +38,11 @@ const carImages: CarouselImage[] = [
 const CarCarousel: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startPos, setStartPos] = useState(0);
+  const [currentTranslate, setCurrentTranslate] = useState(0);
+
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   const nextSlide = useCallback(() => {
     setCurrentIndex((prevIndex) =>
@@ -76,6 +81,70 @@ const CarCarousel: React.FC = () => {
     nextSlide();
   };
 
+  // Drag/Swipe handlers
+  const handleDragStart = (clientX: number) => {
+    setIsDragging(true);
+    setStartPos(clientX);
+    setIsAutoPlaying(false);
+  };
+
+  const handleDragMove = (clientX: number) => {
+    if (!isDragging) return;
+    const currentPosition = clientX;
+    const diff = currentPosition - startPos;
+    setCurrentTranslate(diff);
+  };
+
+  const handleDragEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+
+    const threshold = 50; // Minimum drag distance to trigger slide change
+
+    if (currentTranslate < -threshold) {
+      // Dragged left - go to next slide
+      nextSlide();
+    } else if (currentTranslate > threshold) {
+      // Dragged right - go to previous slide
+      prevSlide();
+    }
+
+    setCurrentTranslate(0);
+  };
+
+  // Mouse events
+  const handleMouseDown = (e: React.MouseEvent) => {
+    handleDragStart(e.clientX);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    e.preventDefault();
+    handleDragMove(e.clientX);
+  };
+
+  const handleMouseUp = () => {
+    handleDragEnd();
+  };
+
+  const handleMouseLeave = () => {
+    if (isDragging) {
+      handleDragEnd();
+    }
+  };
+
+  // Touch events
+  const handleTouchStart = (e: React.TouchEvent) => {
+    handleDragStart(e.touches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    handleDragMove(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    handleDragEnd();
+  };
+
   return (
     <section className="relative w-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 py-16 overflow-hidden">
       {/* Decorative elements */}
@@ -97,20 +166,38 @@ const CarCarousel: React.FC = () => {
           {/* Main Image Container */}
           <div className="relative h-[400px] md:h-[500px] lg:h-[600px] rounded-2xl overflow-hidden shadow-2xl">
             {/* Images */}
-            <div className="relative h-full w-full">
+            <div
+              ref={carouselRef}
+              className="relative h-full w-full cursor-grab active:cursor-grabbing select-none"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseLeave}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
               {carImages.map((image, index) => (
                 <div
                   key={image.id}
-                  className={`absolute inset-0 transition-all duration-700 ease-in-out ${
+                  className={`absolute inset-0 ${
+                    isDragging ? 'transition-none' : 'transition-all duration-700 ease-in-out'
+                  } ${
                     index === currentIndex
                       ? 'opacity-100 scale-100'
                       : 'opacity-0 scale-105'
                   }`}
+                  style={{
+                    transform: index === currentIndex && isDragging
+                      ? `translateX(${currentTranslate}px)`
+                      : undefined
+                  }}
                 >
                   <img
                     src={image.url}
                     alt={image.alt}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover pointer-events-none"
+                    draggable="false"
                   />
                   {/* Gradient Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent" />
