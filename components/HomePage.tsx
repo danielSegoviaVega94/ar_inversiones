@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Header from './Header';
 import Hero from './Hero';
+import CarCarousel from './CarCarousel';
 import TicketSection from './ProjectsSection';
 import HelpSection from './Features';
 import AboutSection from './AboutSection';
@@ -37,6 +38,7 @@ const HomePage: React.FC = () => {
 
       <main>
         <Hero />
+        <CarCarousel />
         <TicketSection onBuy={handleBuyClick} />
         <HelpSection />
         <AboutSection />
