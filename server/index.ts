@@ -1,11 +1,37 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { FlowService } from './services/flowService';
 import { verifyFlowSignature } from './utils/flowSignature';
 
-// Load environment variables
-dotenv.config({ path: '.env.local' });
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+console.log('📂 Current working directory:', process.cwd());
+const envPath = path.resolve(process.cwd(), '.env');
+console.log('🔎 Looking for .env at:', envPath);
+
+if (fs.existsSync(envPath)) {
+  console.log('✅ .env file found');
+  const result = dotenv.config({ path: envPath });
+  if (result.error) {
+    console.error('❌ Error loading .env file:', result.error);
+  } else {
+    console.log('✅ .env file loaded successfully');
+    console.log('   - FLOW_API_URL:', process.env.FLOW_API_URL);
+    console.log('   - FLOW_API_KEY:', process.env.FLOW_API_KEY ? 'Set (Hidden)' : 'Not Set');
+  }
+} else {
+  console.error('❌ .env file NOT found at', envPath);
+  // Try fallback to __dirname
+  const fallbackPath = path.join(__dirname, '..', '.env');
+  console.log('🔎 Trying fallback path:', fallbackPath);
+  dotenv.config({ path: fallbackPath });
+}
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -53,8 +79,10 @@ app.post('/api/payment/create', async (req: Request, res: Response) => {
 
     // Get the base URL from the request
     const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-    const urlReturn = `${frontendUrl}/payment/result`;
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+    // Point urlReturn to backend to handle POST from Flow
+    const urlReturn = `${baseUrl}/api/payment/result`;
 
     console.log('💳 Creating payment with URLs:');
     console.log('  - urlConfirmation:', `${baseUrl}/api/payment/confirm`);
@@ -106,6 +134,34 @@ app.post('/api/payment/create', async (req: Request, res: Response) => {
       error: 'Failed to create payment',
       message: error.message
     });
+  }
+});
+
+/**
+ * Payment Result Handler (Proxy)
+ * Handles the return from Flow (which might be POST) and redirects to Frontend (GET)
+ */
+app.all('/api/payment/result', (req: Request, res: Response) => {
+  try {
+    console.log('🔄 Received return from Flow:', { method: req.method, body: req.body, query: req.query });
+
+    // Flow sends token in body (POST) or query (GET)
+    const token = req.body.token || req.query.token;
+
+    if (!token) {
+      console.error('❌ No token received in return URL');
+      return res.status(400).send('Token missing');
+    }
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const redirectUrl = `${frontendUrl}/payment/result?token=${token}`;
+
+    console.log(`🔀 Redirecting to frontend: ${redirectUrl}`);
+    res.redirect(redirectUrl);
+
+  } catch (error) {
+    console.error('Error handling payment result:', error);
+    res.status(500).send('Error processing payment result');
   }
 });
 
