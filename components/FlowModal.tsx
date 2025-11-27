@@ -18,14 +18,41 @@ const FlowModal: React.FC<FlowModalProps> = ({ paymentState, onClose, onSuccess 
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handlePayClick = (e: React.FormEvent) => {
+  const handlePayClick = async (e: React.FormEvent) => {
     e.preventDefault();
     setStep('flow_redirect');
-    
-    // Simulate API call to create Flow order and redirect
-    setTimeout(() => {
-      setStep('success'); // In a real app, this would be a window.location.href redirect to Flow
-    }, 2500);
+
+    try {
+      // Call our backend to create payment in Flow
+      const response = await fetch('http://localhost:3001/api/payment/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: paymentState.selectedProduct.price,
+          subject: paymentState.selectedProduct.title,
+          email: form.email,
+          payerName: form.name,
+          rut: form.rut,
+          phone: form.phone,
+          productId: paymentState.selectedProduct.id
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.paymentUrl) {
+        // Redirect to Flow payment page
+        window.location.href = `${data.paymentUrl}?token=${data.token}`;
+      } else {
+        throw new Error('Failed to create payment');
+      }
+    } catch (error) {
+      console.error('Error creating payment:', error);
+      alert('Ocurrió un error al procesar el pago. Por favor intenta nuevamente.');
+      setStep('details');
+    }
   };
 
   const formatCurrency = (amount: number) => {
