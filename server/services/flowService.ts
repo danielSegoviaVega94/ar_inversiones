@@ -84,21 +84,33 @@ export class FlowService {
     // Sign the parameters
     const signedParams = signFlowParams(flowParams, this.config.secretKey);
 
+    // Convert to URLSearchParams for proper form encoding
+    const formData = new URLSearchParams();
+    for (const [key, value] of Object.entries(signedParams)) {
+      formData.append(key, String(value));
+    }
+
+    console.log('📤 Sending to Flow API:', {
+      url: `${this.config.apiUrl}/payment/create`,
+      params: Object.keys(signedParams).filter(k => k !== 's'),
+      hasSignature: !!signedParams.s
+    });
+
     try {
       const response = await axios.post(
         `${this.config.apiUrl}/payment/create`,
-        null,
+        formData,
         {
-          params: signedParams,
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
           }
         }
       );
 
+      console.log('✅ Flow payment created:', response.data);
       return response.data;
     } catch (error: any) {
-      console.error('Error creating Flow payment:', error.response?.data || error.message);
+      console.error('❌ Error creating Flow payment:', error.response?.data || error.message);
       throw new Error(`Failed to create payment: ${error.response?.data?.message || error.message}`);
     }
   }

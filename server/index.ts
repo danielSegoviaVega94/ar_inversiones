@@ -1,17 +1,11 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { FlowService } from './services/flowService';
 import { verifyFlowSignature } from './utils/flowSignature';
 
-// Get __dirname equivalent in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Load environment variables from root directory
-dotenv.config({ path: path.join(__dirname, '..', '.env.local') });
+// Load environment variables
+dotenv.config({ path: '.env.local' });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
