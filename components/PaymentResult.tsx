@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
-
-interface PaymentResultProps {
-  token?: string;
-}
 
 interface PaymentData {
   status: 'approved' | 'pending' | 'rejected';
   paymentStatus?: any;
 }
 
-const PaymentResult: React.FC<PaymentResultProps> = ({ token }) => {
+const PaymentResult: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
+
   const [loading, setLoading] = useState(true);
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
   const [error, setError] = useState<string | null>(null);

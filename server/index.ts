@@ -1,11 +1,17 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { FlowService } from './services/flowService';
 import { verifyFlowSignature } from './utils/flowSignature';
 
-// Load environment variables
-dotenv.config({ path: '.env.local' });
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables from root directory
+dotenv.config({ path: path.join(__dirname, '..', '.env.local') });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -53,6 +59,13 @@ app.post('/api/payment/create', async (req: Request, res: Response) => {
 
     // Get the base URL from the request
     const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const urlReturn = `${frontendUrl}/payment/result`;
+
+    console.log('💳 Creating payment with URLs:');
+    console.log('  - urlConfirmation:', `${baseUrl}/api/payment/confirm`);
+    console.log('  - urlReturn:', urlReturn);
+    console.log('  - FRONTEND_URL env:', process.env.FRONTEND_URL);
 
     // Create payment in Flow
     const paymentResponse = await flowService.createPayment({
@@ -63,7 +76,7 @@ app.post('/api/payment/create', async (req: Request, res: Response) => {
       email,
       payerName,
       urlConfirmation: `${baseUrl}/api/payment/confirm`,
-      urlReturn: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/payment/result`,
+      urlReturn,
       optional: JSON.stringify({ rut, phone, productId }) // Store additional data
     });
 
