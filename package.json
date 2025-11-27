@@ -10,7 +10,8 @@
     "server": "tsx watch server/index.ts",
     "server:build": "tsc -p tsconfig.server.json",
     "server:start": "node dist/server/index.js",
-    "dev:all": "concurrently \"npm run dev\" \"npm run server\""
+    "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
+    "test:email": "tsx server/test-email.ts"
   },
   "dependencies": {
     "@types/nodemailer": "^7.0.4",

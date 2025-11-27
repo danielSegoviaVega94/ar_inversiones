@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Environment variables (contains sensitive credentials)
+.env
+.env.local
+
+# Ticket database (contains customer data)
+tickets.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
