@@ -1,0 +1,49 @@
+services:
+  # Backend API Service
+  - type: web
+    name: osvaldo-inversiones-backend
+    runtime: node
+    plan: free  # Puedes cambiar a 'starter' o superior según necesites
+    buildCommand: npm install && npm run server:build
+    startCommand: npm run server:start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Flow Payment Gateway - Configura estos valores en Render Dashboard
+      - key: FLOW_API_KEY
+        sync: false  # Se configura manualmente en Render
+      - key: FLOW_SECRET_KEY
+        sync: false  # Se configura manualmente en Render
+      - key: FLOW_API_URL
+        value: https://sandbox.flow.cl/api  # Cambia a producción cuando estés listo
+      # Server Configuration
+      - key: PORT
+        value: 3001
+      - key: BASE_URL
+        sync: false  # Se configurará con la URL de Render
+      - key: FRONTEND_URL
+        sync: false  # URL del frontend desplegado
+      # Email Configuration (Gmail SMTP)
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: 587
+      - key: EMAIL_SECURE
+        value: false
+      - key: EMAIL_USER
+        sync: false  # Tu email de Gmail
+      - key: EMAIL_PASS
+        sync: false  # App Password de Gmail
+      - key: EMAIL_FROM
+        value: "Osvaldo Inversiones <noreply@osvaldoinversiones.cl>"
+
+    # Configuración de health check
+    healthCheckPath: /api/health
+
+    # Configuración de almacenamiento persistente
+    # IMPORTANTE: El plan Free no incluye discos persistentes
+    # Para usar almacenamiento persistente necesitas un plan de pago
+    # disk:
+    #   name: tickets-data
+    #   mountPath: /opt/render/project/src
+    #   sizeGB: 1
