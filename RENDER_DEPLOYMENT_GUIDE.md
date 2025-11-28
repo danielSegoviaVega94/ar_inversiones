@@ -1,6 +1,6 @@
 # 🚀 Guía de Despliegue del Backend en Render.com
 
-Esta guía te llevará paso a paso por el proceso de desplegar el backend de Osvaldo Inversiones en Render.com, desde la creación de tu cuenta hasta tener tu API funcionando en producción.
+Esta guía te llevará paso a paso por el proceso de desplegar el backend de AR Inversiones en Render.com, desde la creación de tu cuenta hasta tener tu API funcionando en producción.
 
 ## 📋 Tabla de Contenidos
 
@@ -161,7 +161,7 @@ Render te mostrará un formulario de configuración. Completa los campos:
 
 **Name** (Nombre del servicio):
 ```
-osvaldo-inversiones-backend
+ar-inversiones-backend
 ```
 *Nota: Este nombre será parte de tu URL*
 
@@ -254,7 +254,7 @@ PORT=3001
 - Render asigna un PORT automáticamente, pero el código ya lo maneja con `process.env.PORT || 3001`
 
 ```bash
-BASE_URL=https://osvaldo-inversiones-backend.onrender.com
+BASE_URL=https://ar-inversiones-backend.onrender.com
 ```
 - ⚠️ **IMPORTANTE**: Reemplaza con la URL real que Render asignará a tu servicio
 - La encontrarás después del primer deploy
@@ -298,7 +298,7 @@ EMAIL_PASS=xxxx xxxx xxxx xxxx
 - Formato: 16 caracteres sin espacios (ejemplo: `abcdabcdabcdabcd`)
 
 ```bash
-EMAIL_FROM=Osvaldo Inversiones <noreply@osvaldoinversiones.cl>
+EMAIL_FROM=AR Inversiones <noreply@arinversiones.cl>
 ```
 
 #### Variable de Entorno (Opcional):
@@ -350,7 +350,7 @@ npm run server:start
 
 1. Una vez desplegado, verás la URL en la parte superior:
    ```
-   https://osvaldo-inversiones-backend.onrender.com
+   https://ar-inversiones-backend.onrender.com
    ```
 
 2. **⚠️ IMPORTANTE**: Ahora debes actualizar la variable `BASE_URL`:
@@ -589,7 +589,7 @@ El almacenamiento en archivo JSON no es viable para producción. Considera:
 
 En lugar de `[servicio].onrender.com`:
 
-1. Compra un dominio (ej: osvaldoinversiones.cl)
+1. Compra un dominio (ej: arinversiones.cl - ¡ya lo tienes!)
 2. En Render, ve a **Settings → Custom Domain**
 3. Agrega tu dominio
 4. Configura DNS según las instrucciones de Render

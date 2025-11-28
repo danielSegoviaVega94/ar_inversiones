@@ -62,7 +62,7 @@ const emailService = new EmailService({
     user: process.env.EMAIL_USER || '',
     pass: process.env.EMAIL_PASS || ''
   },
-  from: process.env.EMAIL_FROM || 'Osvaldo Inversiones <noreply@osvaldoinversiones.cl>'
+  from: process.env.EMAIL_FROM || 'AR Inversiones <noreply@arinversiones.cl>'
 });
 
 // Store for tracking payments (in production, use a database)

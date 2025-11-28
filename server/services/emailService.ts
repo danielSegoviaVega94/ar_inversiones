@@ -54,7 +54,7 @@ export class EmailService {
       const mailOptions = {
         from: this.config.from,
         to: ticket.email,
-        subject: `🎫 Tu Ticket #${ticket.ticketNumber.toString().padStart(5, '0')} - Osvaldo Inversiones`,
+        subject: `🎫 Tu Ticket #${ticket.ticketNumber.toString().padStart(5, '0')} - AR Inversiones`,
         html: htmlContent,
         text: this.generateTicketEmailText(ticket)
       };
@@ -261,9 +261,9 @@ export class EmailService {
 
     <!-- Footer -->
     <div class="footer">
-      <p style="margin: 0 0 10px 0;"><strong>Osvaldo Inversiones</strong></p>
+      <p style="margin: 0 0 10px 0;"><strong>AR Inversiones</strong></p>
       <p style="margin: 0 0 10px 0;">
-        ¿Preguntas? Contáctanos en <a href="mailto:contacto@osvaldoinversiones.cl">contacto@osvaldoinversiones.cl</a>
+        ¿Preguntas? Contáctanos en <a href="mailto:contacto@arinversiones.cl">contacto@arinversiones.cl</a>
       </p>
       <p style="margin: 0; font-size: 12px; color: #6b7280;">
         Este es un correo automático, por favor no respondas a este mensaje.
@@ -305,8 +305,8 @@ Has adquirido el ticket #${ticketNumberFormatted} de un máximo de 10,000 ticket
 Conserva este correo como comprobante de tu participación.
 
 ---
-Osvaldo Inversiones
-¿Preguntas? Contáctanos en contacto@osvaldoinversiones.cl
+AR Inversiones
+¿Preguntas? Contáctanos en contacto@arinversiones.cl
     `;
   }
 

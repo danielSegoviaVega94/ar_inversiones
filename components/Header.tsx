@@ -43,15 +43,16 @@ const Header: React.FC = () => {
           {/* Logo */}
           <div className="flex-shrink-0">
             <a href="#">
-              <img 
-                src={IMAGES.logo} 
-                alt="Osvaldo Inversiones" 
+              <img
+                src={IMAGES.logo}
+                alt="AR Inversiones"
                 className="h-16 w-auto md:h-20 transition-all duration-300"
               />
             </a>
           </div>
 
           {/* Social Icons & Cart - Desktop/Mobile Unified based on ref */}
+          {/* TODO: Actualizar con las redes sociales de AR Inversiones */}
           <div className="flex items-center space-x-4 md:space-x-6">
             <div className="hidden md:flex items-center space-x-4 text-white">
               <a href="https://www.facebook.com/osvaldo.fuentesfuentes" target="_blank" rel="noreferrer" className="hover:text-brand-blue transition-colors">

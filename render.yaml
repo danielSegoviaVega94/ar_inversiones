@@ -1,7 +1,7 @@
 services:
   # Backend API Service
   - type: web
-    name: osvaldo-inversiones-backend
+    name: ar-inversiones-backend
     runtime: node
     plan: free  # Puedes cambiar a 'starter' o superior según necesites
     buildCommand: npm install && npm run server:build
@@ -35,7 +35,7 @@ services:
       - key: EMAIL_PASS
         sync: false  # App Password de Gmail
       - key: EMAIL_FROM
-        value: "Osvaldo Inversiones <noreply@osvaldoinversiones.cl>"
+        value: "AR Inversiones <noreply@arinversiones.cl>"
 
     # Configuración de health check
     healthCheckPath: /api/health
